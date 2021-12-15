@@ -1,7 +1,7 @@
 const User = require('../models/User')
 const { StatusCodes } = require('http-status-codes')
 const CustomError = require('../errors')
-const { attachCookiesToResponse } = require('../utils')
+const { attachCookiesToResponse, createTokenUser } = require('../utils')
 
 const register = async (req, res) => {
   const { email, name, password } = req.body
@@ -11,7 +11,7 @@ const register = async (req, res) => {
   }
   const role = 'user'
   const user = await User.create({ name, email, password, role })
-  const tokenUser = { name: user.name, id: user._id, role: user.role }
+  const tokenUser = createTokenUser(user)
   attachCookiesToResponse({ res, user: tokenUser })
   res.status(StatusCodes.CREATED).json({ user: tokenUser })
 }
@@ -22,7 +22,6 @@ const login = async (req, res) => {
     throw new CustomError.BadRequestError('Please provide email and password')
   }
   const user = await User.findOne({ email })
-  console.log(user)
   if (!user) {
     throw new CustomError.UnauthenticatedError('Invalid Credentials')
   }
@@ -30,7 +29,7 @@ const login = async (req, res) => {
   if (!passwordCorrect) {
     throw new CustomError.UnauthenticatedError('Invalid Credentials')
   }
-  const tokenUser = { name: user.name, id: user._id, role: user.role }
+  const tokenUser = createTokenUser(user)
   attachCookiesToResponse({ res, user: tokenUser })
   res.status(StatusCodes.OK).json({ user: tokenUser })
 }
