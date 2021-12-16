@@ -24,8 +24,16 @@ const UserSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ['admin', 'user'],
+    enum: ['admin', 'user', 'leader'],
     default: 'user',
+  },
+  team: {
+    type: String,
+    enum: {
+      values: ['none', 'Betos', 'Aslan', 'Jeronimos'],
+      message: '{VALUE} is not supported',
+    },
+    default: 'none',
   },
 })
 

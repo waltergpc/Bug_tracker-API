@@ -7,11 +7,14 @@ const app = express()
 const morgan = require('morgan')
 const cookieParser = require('cookie-parser')
 const cors = require('cors')
+const fileUpload = require('express-fileupload')
+const cloudinary = require('cloudinary').v2
 //db
 const connectDB = require('./db/connect')
 //routers
 const authRouter = require('./routes/authRoutes')
 const userRouter = require('./routes/userRoutes')
+const ticketRouter = require('./routes/ticketRoutes')
 //middleware
 const { authenticateUser } = require('./middleware/authentication')
 const notFoundMiddleware = require('./middleware/not-found')
@@ -21,6 +24,12 @@ app.use(morgan('tiny'))
 app.use(express.json())
 app.use(cookieParser(process.env.JWT_SECRET))
 app.use(cors())
+app.use(fileUpload({ useTempFiles: true }))
+cloudinary.config({
+  cloud_name: process.env.CLOUD_NAME,
+  api_key: process.env.CLOUD_API_KEY,
+  api_secret: process.env.CLOUD_SECRET,
+})
 
 app.get('/', (req, res) => {
   console.log(req.cookies)
@@ -34,6 +43,7 @@ app.get('/api/v1', (req, res) => {
 
 app.use('/api/v1/auth', authRouter)
 app.use('/api/v1/users', authenticateUser, userRouter)
+app.use('/api/v1/tickets', authenticateUser, ticketRouter)
 
 app.use(notFoundMiddleware)
 app.use(errorHandlerMiddleware)
