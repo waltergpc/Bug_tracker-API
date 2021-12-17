@@ -54,8 +54,16 @@ const TicketSchema = new mongoose.Schema(
       ref: 'User',
       required: [true, 'Plase provide a user'],
     },
+    assignedTo: {
+      type: [mongoose.Types.ObjectId],
+      ref: 'User',
+      default: [],
+    },
   },
   { timestamps: true }
 )
 
+TicketSchema.pre('remove', async function (next) {
+  await this.model('Comment').deleteMany({ ticket: this._id })
+})
 module.exports = mongoose.model('Ticket', TicketSchema)

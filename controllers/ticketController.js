@@ -1,4 +1,5 @@
 const Ticket = require('../models/Ticket')
+const Comment = require('../models/Comment')
 const { StatusCodes } = require('http-status-codes')
 const CustomError = require('../errors')
 const cloudinary = require('cloudinary').v2
@@ -14,20 +15,33 @@ const createTicket = async (req, res) => {
 const getAllTickets = async (req, res) => {
   let tickets
   if (req.user.role === 'admin') {
-    tickets = await Ticket.find({})
+    tickets = await Ticket.find({}).populate({
+      path: 'createdBy',
+      select: 'name',
+    })
   } else {
-    tickets = await Ticket.find({ team: req.user.team })
+    tickets = await Ticket.find({ team: req.user.team }).populate({
+      path: 'createdBy',
+      select: 'name',
+    })
   }
   res.status(StatusCodes.OK).json({ tickets, count: tickets.length })
 }
 
 const getSingleTicket = async (req, res) => {
   const { id: ticketId } = req.params
-  const ticket = await Ticket.findOne({ _id: ticketId })
+  const ticket = await Ticket.findOne({ _id: ticketId }).populate({
+    path: 'createdBy',
+    select: 'name',
+  })
   if (!ticket) {
     throw new CustomError.NotFoundError(`No ticket with ${ticketId} id`)
   }
-  res.status(StatusCodes.OK).json({ ticket })
+  const comments = await Comment.find({ ticket: ticketId }).populate({
+    path: 'user',
+    select: 'name',
+  })
+  res.status(StatusCodes.OK).json({ ticket, comments })
 }
 
 const updateTicket = async (req, res) => {
