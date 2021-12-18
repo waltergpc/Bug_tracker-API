@@ -6,4 +6,10 @@ const checkPermissions = (requestUser, resourceUserId) => {
   throw new CustomError.UnauthorizedError('Unauthorizaed resource')
 }
 
-module.exports = checkPermissions
+const checkTicketPermissions = (requestUser, resourceUserId) => {
+  if (requestUser.role === 'admin' || 'leader') return
+  if (requestUser.userId === resourceUserId.toString()) return
+  throw new CustomError.UnauthorizedError('Unauthorizaed resource')
+}
+
+module.exports = { checkPermissions, checkTicketPermissions }

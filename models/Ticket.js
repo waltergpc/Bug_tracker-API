@@ -54,11 +54,12 @@ const TicketSchema = new mongoose.Schema(
       ref: 'User',
       required: [true, 'Plase provide a user'],
     },
-    assignedTo: {
-      type: [mongoose.Types.ObjectId],
-      ref: 'User',
-      default: [],
-    },
+    assignedTo: [
+      {
+        type: mongoose.Types.ObjectId,
+        ref: 'User',
+      },
+    ],
   },
   { timestamps: true }
 )

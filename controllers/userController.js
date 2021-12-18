@@ -28,9 +28,10 @@ const showCurrentUser = async (req, res) => {
 }
 
 const updateUser = async (req, res) => {
-  const { email, name } = req.body
-  if (!email || !name) {
-    throw new CustomError.BadRequestError('Please Provide email and name')
+  const { email, name, team } = req.body
+  checkPermissions(req.user, user._id)
+  if (!email || !name || !team) {
+    throw new CustomError.BadRequestError('Please Provide email, name')
   }
   const user = await User.findOneAndUpdate(
     { _id: req.user.userId },
