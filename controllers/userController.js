@@ -28,19 +28,29 @@ const showCurrentUser = async (req, res) => {
 }
 
 const updateUser = async (req, res) => {
-  const { email, name, team } = req.body
-  checkPermissions(req.user, user._id)
-  if (!email || !name || !team) {
+  const { email, name } = req.body
+
+  let { image } = req.body
+  if (!image) {
+    image = undefined
+  }
+  if (!email || !name) {
     throw new CustomError.BadRequestError('Please Provide email, name')
   }
-  const user = await User.findOneAndUpdate(
-    { _id: req.user.userId },
-    { email, name },
-    { new: true, runValidators: true }
-  )
+  const user = await User.findOne({ _id: req.user.userId })
+  if (!user) {
+    throw new CustomError.NotFoundError('User with given id not found')
+  }
+  checkPermissions(req.user, user._id)
+  user.email = email
+  user.name = name
+  user.team = team
+  user.image = image
+  await user.save()
+
   const tokenUser = createTokenUser(user)
   attachCookiesToResponse({ res, user: tokenUser })
-  res.status(StatusCodes.OK).json({ user: tokenUser })
+  res.status(StatusCodes.OK).json({ user: tokenUser, img: user.image })
 }
 
 const updateUserPassword = async (req, res) => {
@@ -60,10 +70,22 @@ const updateUserPassword = async (req, res) => {
   res.status(StatusCodes.OK).json({ msg: 'Password change succesful' })
 }
 
+const assignTeam = async (req, res) => {
+  const { toAssign, team } = req.body
+  const user = await User.findOneAndUpdate(
+    { _id: toAssign },
+    { team },
+    { new: true, runValidators: true }
+  )
+  res
+    .status(StatusCodes.OK)
+    .json({ msg: `User ${toAssign} has been assigned to team ${team}` })
+}
 module.exports = {
   getAllUsers,
   getSingleUser,
   showCurrentUser,
   updateUser,
   updateUserPassword,
+  assignTeam,
 }

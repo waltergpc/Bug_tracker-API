@@ -35,6 +35,7 @@ const login = async (req, res) => {
 }
 
 const logout = async (req, res) => {
+  const token = req.signedCookies.token
   res.cookie('token', 'logout', {
     httpOnly: true,
     expiresIn: new Date(Date.now()),

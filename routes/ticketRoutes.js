@@ -7,8 +7,8 @@ const {
   getSingleTicket,
   updateTicket,
   deleteTicket,
-  uploadImage,
 } = require('../controllers/ticketController')
+const { uploadImage } = require('../controllers/uploadImageController')
 
 router.route('/').post(createTicket).get(getAllTickets)
 router.route('/uploadImage').post(uploadImage)

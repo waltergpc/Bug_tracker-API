@@ -35,9 +35,14 @@ const UserSchema = new mongoose.Schema({
     },
     default: 'none',
   },
+  image: {
+    type: String,
+    required: false,
+  },
 })
 
 UserSchema.pre('save', async function () {
+  if (!this.isModified('password')) return
   const hashedPassword = await bcrypt.hash(this.password, 10)
   this.password = hashedPassword
 })

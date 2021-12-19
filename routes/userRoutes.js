@@ -1,4 +1,5 @@
 const express = require('express')
+const { uploadImage } = require('../controllers/uploadImageController')
 const router = express.Router()
 const {
   getAllUsers,
@@ -6,6 +7,7 @@ const {
   showCurrentUser,
   updateUser,
   updateUserPassword,
+  assignTeam,
 } = require('../controllers/userController')
 const { authorizePermissions } = require('../middleware/authentication')
 
@@ -18,6 +20,10 @@ router.route('/showMe').get(showCurrentUser)
 router.route('/updateUser').patch(updateUser)
 
 router.route('/updateUserPassword').patch(updateUserPassword)
+
+router.route('/uploadimage').post(uploadImage)
+
+router.route('/assignteam').patch(authorizePermissions('admin'), assignTeam)
 
 router.route('/:id').get(getSingleUser)
 

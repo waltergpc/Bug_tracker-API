@@ -3,10 +3,9 @@ const Comment = require('../models/Comment')
 const { StatusCodes } = require('http-status-codes')
 const CustomError = require('../errors')
 const { checkTicketPermissions } = require('../utils')
-const cloudinary = require('cloudinary').v2
-const fs = require('fs')
 
 const createTicket = async (req, res) => {
+  console.log(req.body)
   req.body.createdBy = req.user.userId
   req.body.team = req.user.team
   const ticket = await Ticket.create(req.body)
@@ -63,7 +62,6 @@ const getSingleTicket = async (req, res) => {
 
 const updateTicket = async (req, res) => {
   const { id: ticketId } = req.params
-  che
   const ticket = await Ticket.findOneAndUpdate({ _id: ticketId }, req.body, {
     new: true,
     runValidators: true,
@@ -82,30 +80,10 @@ const deleteTicket = async (req, res) => {
   res.status(StatusCodes.OK).json({ msg: 'Successful remove' })
 }
 
-const uploadImage = async (req, res) => {
-  if (!req.files) {
-    throw new CustomError.BadRequestError('No file uploaded')
-  }
-  if (!req.files.image.mimetype.startsWith('image')) {
-    throw new CustomError.BadRequestError('Please upload image file')
-  }
-  if (!req.files.image.size > 1024 * 1024 * 5) {
-    throw new CustomError.BadRequestError('Please upload smaller image file')
-  }
-  const result = await cloudinary.uploader.upload(
-    req.files.image.tempFilePath,
-    { use_fileName: true, folder: 'ticket-media' }
-  )
-  fs.unlinkSync(req.files.image.tempFilePath)
-
-  res.status(StatusCodes.CREATED).json({ src: result.secure_url })
-}
-
 module.exports = {
   createTicket,
   getAllTickets,
   getSingleTicket,
   updateTicket,
   deleteTicket,
-  uploadImage,
 }
