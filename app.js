@@ -9,6 +9,10 @@ const cookieParser = require('cookie-parser')
 const cors = require('cors')
 const fileUpload = require('express-fileupload')
 const cloudinary = require('cloudinary').v2
+const rateLimiter = require('express-rate-limit')
+const helmet = require('helmet')
+const xss = require('xss-clean')
+const mongoSanitize = require('express-mongo-sanitize')
 //db
 const connectDB = require('./db/connect')
 //routers
@@ -20,6 +24,17 @@ const commentRouter = require('./routes/commentRoutes')
 const { authenticateUser } = require('./middleware/authentication')
 const notFoundMiddleware = require('./middleware/not-found')
 const errorHandlerMiddleware = require('./middleware/error-handler')
+
+app.set('trust proxy', 1)
+app.use(
+  rateLimiter({
+    windowMs: 15 * 60 * 1000,
+    max: 60,
+  })
+)
+app.use(helmet())
+app.use(xss())
+app.use(mongoSanitize())
 
 app.use(morgan('tiny'))
 app.use(express.json())

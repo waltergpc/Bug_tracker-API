@@ -4,6 +4,7 @@ const {
   checkPermissions,
   checkTicketPermissions,
 } = require('./checkPermissions')
+const sendVerificationEmail = require('./sendVerificationEmail')
 
 module.exports = {
   attachCookiesToResponse,
@@ -11,4 +12,5 @@ module.exports = {
   createTokenUser,
   checkPermissions,
   checkTicketPermissions,
+  sendVerificationEmail,
 }
