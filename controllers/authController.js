@@ -6,6 +6,7 @@ const {
   attachCookiesToResponse,
   createTokenUser,
   sendVerificationEmail,
+  sendResetPasswordEmail,
 } = require('../utils')
 const crypto = require('crypto')
 
@@ -101,9 +102,68 @@ const verifyEmail = async (req, res) => {
   res.status(StatusCodes.OK).json({ msg: 'Email verified' })
 }
 
+const forgotPassword = async (req, res) => {
+  const { email } = req.body
+  console.log(email)
+  if (!email) {
+    throw new CustomError.BadRequestError('Please provide your email')
+  }
+  const user = await User.findOne({ email })
+  if (!user) {
+    throw new CustomError.NotFoundError('No user with provided email')
+  }
+  if (user) {
+    const passwordToken = crypto.randomBytes(70).toString('hex')
+    // send email
+
+    await sendResetPasswordEmail({
+      name: user.name,
+      email: user.email,
+      verificationToken: passwordToken,
+    })
+    const tenMinutes = 1000 * 60 * 10
+    const passwordTokenExpirationDate = new Date(Date.now() + tenMinutes)
+    user.passwordToken = passwordToken
+    user.passwordTokenExpirationDate = passwordTokenExpirationDate
+    await user.save()
+  }
+  res
+    .status(StatusCodes.OK)
+    .json({ msg: 'Please Check email for reset password' })
+}
+
+const resetPassword = async (req, res) => {
+  const { token, email, password } = req.body
+  if (!token || !email || !password) {
+    throw new CustomError.BadRequestError('Please provide all values')
+  }
+  const user = await User.findOne({ email })
+  if (user) {
+    const currentDate = new Date()
+    if (user.passwordTokenExpirationDate < currentDate) {
+      throw new CustomError.BadRequestError(
+        'Token has expirated, please restart the process'
+      )
+    }
+
+    if (
+      user.passwordToken === token &&
+      user.passwordTokenExpirationDate > currentDate
+    ) {
+      user.password = password
+      user.passwordToken = null
+      user.passwordTokenExpirationDate = null
+      await user.save()
+    }
+  }
+  res.status(StatusCodes.OK).json({ msg: 'Password changed' })
+}
+
 module.exports = {
   register,
   login,
   logout,
   verifyEmail,
+  forgotPassword,
+  resetPassword,
 }
