@@ -23,10 +23,15 @@ const register = async (req, res) => {
     email: user.email,
     verificationToken: user.verificationToken,
   })
-  res.status(StatusCodes.CREATED).json({
-    msg: 'Success, please verify in email',
-    verificationToken: user.verificationToken,
-  })
+  const tokenUser = createTokenUser(user)
+  refreshToken = crypto.randomBytes(40).toString('hex')
+  const userAgent = req.headers['user-agent']
+  const ip = req.ip
+  const userToken = { refreshToken, ip, userAgent, user: user._id }
+  const tempToken = await Token.create(userToken)
+
+  attachCookiesToResponse({ res, user: tokenUser, refresh: refreshToken })
+  res.status(StatusCodes.OK).json({ user: tokenUser })
 }
 
 const login = async (req, res) => {
@@ -41,11 +46,6 @@ const login = async (req, res) => {
   const passwordCorrect = await user.comparePassword(password)
   if (!passwordCorrect) {
     throw new CustomError.UnauthenticatedError('Invalid Credentials')
-  }
-  if (!user.isVerified) {
-    throw new CustomError.UnauthenticatedError(
-      'You need to verify with your email account'
-    )
   }
   const tokenUser = createTokenUser(user)
   //create refreshToken
