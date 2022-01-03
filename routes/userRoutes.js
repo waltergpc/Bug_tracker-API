@@ -13,7 +13,9 @@ const { authorizePermissions } = require('../middleware/authentication')
 
 // Routes
 
-router.route('/').get(authorizePermissions('admin', 'owner'), getAllUsers)
+router
+  .route('/')
+  .get(authorizePermissions('admin', 'leader', 'user'), getAllUsers)
 
 router.route('/showMe').get(showCurrentUser)
 

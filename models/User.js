@@ -20,7 +20,7 @@ const UserSchema = new mongoose.Schema({
   password: {
     type: String,
     required: [true, 'Please provide a password'],
-    minlength: 8,
+    minlength: [8, 'Password should be at least 8 characters'],
   },
   role: {
     type: String,
@@ -38,6 +38,8 @@ const UserSchema = new mongoose.Schema({
   image: {
     type: String,
     required: false,
+    default:
+      'https://res.cloudinary.com/dgsy6fc2b/image/upload/v1640841375/user-image/default-user_fquqlt.png',
   },
   verificationToken: {
     type: String,

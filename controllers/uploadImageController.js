@@ -8,7 +8,8 @@ const uploadImage = async (req, res) => {
   if (!folder) {
     folder = 'default'
   }
-  console.log(folder)
+  console.log(req.body)
+  console.log(req.files)
 
   if (!req.files) {
     throw new CustomError.BadRequestError('No file uploaded')

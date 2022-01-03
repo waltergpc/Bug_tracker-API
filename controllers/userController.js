@@ -8,7 +8,15 @@ const {
 } = require('../utils')
 
 const getAllUsers = async (req, res) => {
-  const users = await User.find({ role: 'user' }).select('-password')
+  let users
+  if (req.user.role === 'admin') {
+    users = await User.find({}).select('-password')
+  } else {
+    users = await User.find({ team: req.user.team }).select(
+      '-password -isVerified'
+    )
+  }
+
   res.status(StatusCodes.OK).json({ users })
 }
 
@@ -27,12 +35,9 @@ const showCurrentUser = async (req, res) => {
 }
 
 const updateUser = async (req, res) => {
-  const { email, name } = req.body
+  const { email, name, image } = req.body
+  console.log(req.body)
 
-  let { image } = req.body
-  if (!image) {
-    image = undefined
-  }
   if (!email || !name) {
     throw new CustomError.BadRequestError('Please Provide email, name')
   }
@@ -41,15 +46,18 @@ const updateUser = async (req, res) => {
     throw new CustomError.NotFoundError('User with given id not found')
   }
   checkPermissions(req.user, user._id)
-  user.email = email
-  user.name = name
-  user.team = team
-  user.image = image
+  if (!image) {
+    user.email = email
+    user.name = name
+  }
+  if (image) {
+    user.image = image.src
+  }
   await user.save()
 
   const tokenUser = createTokenUser(user)
   attachCookiesToResponse({ res, user: tokenUser })
-  res.status(StatusCodes.OK).json({ user: tokenUser, img: user.image })
+  res.status(StatusCodes.OK).json({ user: tokenUser })
 }
 
 const updateUserPassword = async (req, res) => {
@@ -62,7 +70,7 @@ const updateUserPassword = async (req, res) => {
   const user = await User.findOne({ _id: req.user.userId })
   const passwordCorrect = await user.comparePassword(oldPassword)
   if (!passwordCorrect) {
-    throw new CustomError.UnauthenticatedError('Password does not match')
+    throw new CustomError.UnauthenticatedError(' Old Password does not match')
   }
   user.password = newPassword
   await user.save()
@@ -71,9 +79,10 @@ const updateUserPassword = async (req, res) => {
 
 const assignTeam = async (req, res) => {
   const { toAssign, team } = req.body
-  const user = await User.findOneAndUpdate(
+  console.log(req.body)
+  await User.findOneAndUpdate(
     { _id: toAssign },
-    { team },
+    { team: team },
     { new: true, runValidators: true }
   )
   res

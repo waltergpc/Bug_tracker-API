@@ -5,6 +5,7 @@ const CustomError = require('../errors')
 const { checkPermissions } = require('../utils')
 
 const createComment = async (req, res) => {
+  console.log(req.body)
   const { ticket: ticketId } = req.body
   const isTicketValid = await Ticket.findOne({ _id: ticketId })
   if (!isTicketValid) {

@@ -104,7 +104,6 @@ const verifyEmail = async (req, res) => {
 
 const forgotPassword = async (req, res) => {
   const { email } = req.body
-  console.log(email)
   if (!email) {
     throw new CustomError.BadRequestError('Please provide your email')
   }
