@@ -6,7 +6,7 @@ const CommentSchema = new mongoose.Schema(
       type: String,
       required: [true, 'Please provide a title for the ticket comment'],
       minlength: 4,
-      maxlength: 30,
+      maxlength: [40, 'Comment title cannot exceed 40 characters'],
       trim: true,
     },
     comment: {

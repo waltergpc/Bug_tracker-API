@@ -45,6 +45,9 @@ const updateUser = async (req, res) => {
   if (!user) {
     throw new CustomError.NotFoundError('User with given id not found')
   }
+  if (user.email === 'demouser@demouser.com') {
+    throw new CustomError.UnauthorizedError('Demo user cannot be modified')
+  }
   checkPermissions(req.user, user._id)
   if (!image) {
     user.email = email
