@@ -2,7 +2,7 @@ const sendEmail = require('./sendEmail')
 
 const sendVerificationEmail = async ({ name, email, verificationToken }) => {
   const message = `Please confirm email by clicking the following link :  
-  http://localhost:3000/verify-account?email=${email}&verificationToken=${verificationToken}`
+  https://scarabio.netlify.app/verify-account?email=${email}&verificationToken=${verificationToken}`
 
   return sendEmail({
     to: email,
