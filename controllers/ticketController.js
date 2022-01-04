@@ -53,7 +53,7 @@ const getSingleTicket = async (req, res) => {
 const updateTicket = async (req, res) => {
   const { id: ticketId } = req.params
   req.body.team = req.user.team
-  const ticket = await Ticket.findOne({ _id: ticketId }, req.body, {
+  const ticket = await Ticket.findOneAndUpdate({ _id: ticketId }, req.body, {
     new: true,
     runValidators: true,
   })
